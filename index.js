@@ -258,14 +258,48 @@ app.get("/sessions/active", (req, res) => {
 
 app.get("/pair", async (req, res) => {
     const num = req.query.number;
-    if (!num) return res.json({ error: "Numéro requis" });
+
+    if (!num) {
+        return res.json({ error: "Number required" });
+    }
+
     try {
-        const dvmsy = await startUserBot(num, true);
-        await delay(8000);
-        const code = await dvmsy.requestPairingCode(num.trim());
-        res.json({ success: true, code: code });
+        const sock = await startUserBot(num, true);
+
+        // wait for Baileys auth to initialize properly
+        const waitForPairing = async () => {
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Pairing timeout"));
+                }, 15000);
+
+                sock.ev.on("connection.update", async (update) => {
+                    try {
+                        if (!sock.authState?.creds?.registered) {
+                            const code = await sock.requestPairingCode(num.trim());
+                            clearTimeout(timeout);
+
+                            resolve({
+                                success: true,
+                                code: code
+                            });
+                        }
+                    } catch (err) {
+                        clearTimeout(timeout);
+                        reject(err);
+                    }
+                });
+            });
+        };
+
+        const result = await waitForPairing();
+        return res.json(result);
+
     } catch (e) {
-        res.json({ success: false, error: "Erreur de connexion" });
+        return res.json({
+            success: false,
+            error: e.message
+        });
     }
 });
 
@@ -273,4 +307,4 @@ app.get("/pair", async (req, res) => {
 app.listen(port, async () => {
     console.log(`🌐 NUll CRASH IS READY ON : http://localhost:${port}`);
     await restoreSessions();
-});
+});a
