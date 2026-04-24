@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NULL CRASH · PAIRING</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Tailwind Config with Neon Extensions -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neon: '#0af0ff',
+                        'neon-dark': '#00c8e0',
+                        'neon-glow': '#4effff',
+                        'dark-bg': '#010108',
+                        'card-glass': '#0a0a14',
+                        border: '#1a2a3a',
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fadeIn': 'fadeIn 0.6s ease-out forwards',
+                        'slideUp': 'slideUp 0.5s ease-out forwards',
+                        'pulse-neon': 'pulseNeon 2s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'drift': 'drift 8s ease-in-out infinite',
+                        'borderPulse': 'borderPulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(25px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        pulseNeon: {
+                            '0%, 100%': { textShadow: '0 0 4px #0af0ff, 0 0 8px #0af0ff' },
+                            '50%': { textShadow: '0 0 12px #0af0ff, 0 0 20px #00c8e0' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' }
+                        },
+                        drift: {
+                            '0%': { transform: 'translateX(0px) translateY(0px)' },
+                            '50%': { transform: 'translateX(20px) translateY(-10px)' },
+                            '100%': { transform: 'translateX(0px) translateY(0px)' }
+                        },
+                        borderPulse: {
+                            '0%, 100%': { borderColor: '#0af0ff', boxShadow: '0 0 0px rgba(10,240,255,0.3)' },
+                            '50%': { borderColor: '#4effff', boxShadow: '0 0 12px rgba(10,240,255,0.7)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #010108;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom neon scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050510;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0af0ff;
+            border-radius: 10px;
+            box-shadow: 0 0 6px #0af0ff;
+        }
+        
+        /* Animated gradient background with neon waves */
+        .neon-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 20% 40%, #02021a, #000000);
+        }
+        
+        .moving-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            opacity: 0.4;
+        }
+        
+        .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #0af0ff, transparent);
+            height: 2px;
+            width: 100%;
+            animation: moveLine 8s linear infinite;
+            filter: blur(1px);
+        }
+        
+        @keyframes moveLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .glow-ball {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(10,240,255,0.2) 0%, rgba(10,240,255,0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float 12s infinite alternate;
+        }
+        
+        /* Glassmorphism with neon borders */
+        .glass-neon {
+            background: rgba(10, 15, 25, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(10, 240, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(10, 240, 255, 0.1);
+        }
+        
+        .neon-input {
+            background: #0a0a14;
+            border: 1px solid #1e2a3a;
+            transition: all 0.25s ease;
+        }
+        
+        .neon-input:focus {
+            border-color: #0af0ff;
+            box-shadow: 0 0 12px rgba(10, 240, 255, 0.4);
+            outline: none;
+        }
+        
+        .neon-btn {
+            background: linear-gradient(135deg, #0af0ff, #0088aa);
+            box-shadow: 0 0 12px rgba(10, 240, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .neon-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 22px rgba(10, 240, 255, 0.8);
+            background: linear-gradient(135deg, #1effff, #00aacc);
+        }
+        
+        .code-box {
+            background: rgba(10, 240, 255, 0.05);
+            border: 1px solid #0af0ff;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        
+        .code-box:hover {
+            background: rgba(10, 240, 255, 0.15);
+            box-shadow: 0 0 15px rgba(10, 240, 255, 0.3);
+        }
+        
+        .tab-active {
+            background: #0af0ff !important;
+            color: #010108 !important;
+            box-shadow: 0 0 12px #0af0ff;
+            font-weight: bold;
+        }
+        
+        .tab-inactive {
+            background: rgba(10, 240, 255, 0.05);
+            color: #9ca3af;
+            border: 1px solid rgba(10, 240, 255, 0.2);
+        }
+        
+        .server-card-active {
+            border: 1px solid #0af0ff;
+            background: rgba(10, 240, 255, 0.1);
+            box-shadow: 0 0 12px rgba(10, 240, 255, 0.3);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-neon {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- NEON BACKGROUND DYNAMIC -->
+    <div class="neon-bg"></div>
+    <div class="moving-lines">
+        <div class="line" style="top: 15%; animation-duration: 7s; opacity: 0.6;"></div>
+        <div class="line" style="top: 35%; animation-duration: 11s; opacity: 0.4; width: 80%; left: 10%;"></div>
+        <div class="line" style="top: 55%; animation-duration: 9s; opacity: 0.5;"></div>
+        <div class="line" style="top: 75%; animation-duration: 13s; opacity: 0.3; width: 70%;"></div>
+        <div class="line" style="top: 88%; animation-duration: 6s; opacity: 0.7;"></div>
+    </div>
+    <div class="glow-ball" style="top: -150px; right: -100px;"></div>
+    <div class="glow-ball" style="bottom: -200px; left: -120px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(0,200,255,0.15) 0%, transparent 70%);"></div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
+    <div class="relative min-h-screen flex flex-col items-center justify-center p-5 sm:p-6">
+        <main class="w-full max-w-[480px] z-10 animate-[slideUp_0.5s_ease-out]">
+            
+            <!-- Back Link -->
+            <a href="https://minatocrash.lordobitotech.xyz" 
+               class="inline-flex items-center gap-2 mb-5 text-xs font-mono text-gray-400 hover:text-neon transition-all duration-300 group">
+                <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                <span>BACK</span>
+            </a>
+
+            <!-- Active Sessions Badge (Neon Pulse) -->
+            <div class="flex justify-center mb-5">
+                <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-neon/5 border border-neon/40 backdrop-blur-sm">
+                    <i class="fas fa-bolt text-neon text-xs animate-pulse"></i>
+                    <span class="text-[11px] font-inter tracking-wider text-gray-300">
+                        SERVER 1 ACTIVE: <span class="text-neon font-bold text-sm" id="totalSessionsDisplay">0</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Brand Header NULL CRASH V1--->
+            <div class="text-center mb-8">
+                <div class="relative h-24 w-24 mx-auto mb-4">
+                    <div class="absolute inset-0 rounded-2xl bg-neon/20 blur-xl"></div>
+                    <div class="relative h-full w-full rounded-2xl overflow-hidden border-2 border-neon/60 shadow-[0_0_20px_#0af0ff]">
+                        <img src=".media/Bot.png" alt="NULL" class="h-full w-full object-cover">
+                    </div>
+                </div>
+                <h1 class="font-orbitron text-2xl md:text-3xl font-extrabold tracking-wider bg-gradient-to-r from-white via-neon to-neon-dark bg-clip-text text-transparent animate-pulse-neon">
+                    NULL CRASH V1
+                </h1>
+                <p class="font-rajdhani text-[11px] text-neon font-semibold tracking-[0.3em] mt-2" id="serverMode">
+                    <i class="fas fa-link mr-1"></i> NULL PARING MODE
+                </p>
+            </div>
+
+            <!-- Main Neon Card -->
+            <div class="glass-neon rounded-2xl p-1 shadow-2xl">
+                <div class="bg-[#05070e]/80 rounded-xl p-5 md:p-6 backdrop-blur-sm border border-white/5">
+                    
+                    <!-- Refresh Button Neon -->
+                    <div class="flex justify-end mb-3">
+                        <button onclick="refreshStats()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 border border-neon/30 text-xs text-gray-300 hover:text-neon hover:border-neon/70 transition-all duration-300">
+                            <i class="fas fa-sync-alt text-[10px]" id="refreshIcon"></i>
+                            <span id="refreshText" class="font-mono">REFRESH</span>
+                        </button>
+                    </div>
+
+                    <!-- Tabs Neon Design -->
+                    <div class="flex p-1 bg-black/60 rounded-xl mb-6 border border-neon/20">
+                        <button onclick="switchTab('phone')" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 tab-active" id="phoneTab">
+                            <i class="fas fa-mobile-alt"></i> PHONE LINK
+                        </button>
+                        <button onclick="switchTab('qr')" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 tab-inactive" id="qrTab">
+                            <i class="fas fa-qrcode"></i> QR SCAN
+                        </button>
+                    </div>
+
+                    <!-- Phone View -->
+                    <div id="phoneView" class="space-y-6 animate-fadeIn">
+                        <div class="text-center">
+                            <h3 class="text-lg font-rajdhani font-bold text-white">DEVICE AUTHENTICATION</h3>
+                            <p class="text-xs text-gray-400 mt-1">Enter your WhatsApp number (country code + number).</p>
+                            <p class="text-[10px] text-neon/70 mt-1"><i class="fas fa-globe-americas"></i> Default country: +242</p>
+                        </div>
+
+                        <form onsubmit="event.preventDefault(); generateCode()" class="space-y-5">
+                            <div class="group relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-phone-alt text-neon/40 group-focus-within:text-neon transition-all"></i>
+                                </div>
+                                <input type="tel" id="phoneInput" placeholder="e.g., 242XXXXXXXXX" 
+                                       class="block w-full bg-[#0a0a14] border border-[#1e2a3a] rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-gray-500 focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none transition-all duration-300 font-rajdhani text-base tracking-wide">
+                            </div>
+
+                            <button type="submit" id="generateBtn"
+                                    class="neon-btn w-full text-black font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider font-inter">
+                                <span>GET PAIRING CODE</span>
+                                <i class="fas fa-terminal"></i>
+                            </button>
+                        </form>
+
+                        <!-- Loading -->
+                        <div id="loadingArea" class="min-h-[50px] flex items-center justify-center hidden">
+                            <div class="text-sm font-inter text-neon animate-pulse flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin"></i> GENERATING SECURE CODE...
+                            </div>
+                        </div>
+
+                        <!-- Code Display with copy -->
+                        <div id="codeDisplay" class="w-full hidden cursor-pointer" onclick="copyCode()">
+                            <div class="code-box w-full rounded-xl p-4 text-center transition-all">
+                                <span class="font-mono text-2xl md:text-3xl font-bold tracking-[0.15em] text-neon" id="codeValue"></span>
+                            </div>
+                            <p class="text-center text-[10px] text-gray-500 mt-2 font-inter">
+                                <i class="far fa-copy"></i> Click code to copy
+                            </p>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="text-sm font-inter text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg py-2 hidden animate-pulse"></div>
+                    </div>
+
+                    <!-- QR View (Info message) -->
+                    <div id="qrView" class="space-y-6 animate-fadeIn flex flex-col items-center hidden">
+                        <div class="text-center">
+                            <h3 class="text-lg font-rajdhani font-bold text-white">QR MODE</h3>
+                            <p class="text-xs text-yellow-400 flex items-center gap-1 justify-center mt-1"><i class="fas fa-exclamation-triangle"></i> QR CODE UNAVAILABLE</p>
+                        </div>
+                        <div class="relative w-56 h-56 rounded-2xl flex items-center justify-center bg-black/40 border-2 border-yellow-500/40">
+                            <i class="fas fa-qrcode text-7xl text-yellow-500/30"></i>
+                        </div>
+                        <div class="w-full bg-neon/5 border border-neon/20 rounded-xl p-4">
+                            <h4 class="text-[10px] uppercase tracking-widest text-neon mb-2 font-bold flex items-center gap-1"><i class="fas fa-info-circle"></i> INFORMATION</h4>
+                            <ul class="text-xs text-gray-400 space-y-2 font-inter list-disc pl-4">
+                                <li>QR mode is not available on this server</li>
+                                <li>Please use <span class="text-neon">PHONE LINK</span> for authentication</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- SERVER SELECTOR (Neon Cards) -->
+                    <div class="mt-7 pt-5 border-t border-neon/20">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="fas fa-microchip text-neon"></i>
+                            <span class="text-[11px] font-inter text-neon uppercase tracking-wider font-bold">AVAILABLE SERVERS</span>
+                        </div>
+
+                        <!-- Server 1 (active) -->
+                        <div class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl server-card-active mb-3 transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 rounded-lg bg-neon/20">
+                                    <i class="fas fa-shield-alt text-neon"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-orbitron text-sm font-bold text-white tracking-wide">NULL NODE 1</span>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-green-500/30 text-green-400 border border-green-500/40">ONLINE</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <i class="fas fa-users text-gray-500 text-[11px]"></i>
+                                        <span class="text-xs text-gray-400" id="server1Sessions">0/45 sessions</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-neon font-bold animate-pulse">ACTIVE</span>
+                        </div>
+
+                        <!-- Server 2 link with dynamic status -->
+                        <a id="server2Btn" href="https://orlyne-backe d2.duckdns.org" 
+                           class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-black/30 border border-neon/20 hover:border-neon/70 transition-all duration-300 group cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 rounded-lg bg-neon/5 group-hover:bg-neon/20 transition">
+                                    <i class="fas fa-cloud-upload-alt text-neon"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-orbitron text-sm font-bold text-white group-hover:text-neon transition">NULL NODE 2</span>
+                                        <span id="server2Status" class="text-[10px] px-2 py-0.5 rounded-full bg-green-500/30 text-green-400">ONLINE</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <i class="fas fa-chart-line text-gray-500 text-[11px]"></i>
+                                        <span class="text-xs text-gray-400" id="server2Sessions">0/45 sessions</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-500 group-hover:text-neon group-hover:translate-x-1 transition-all"></i>
+                        </a>
+
+                        <!-- Status warnings for Server 1 -->
+                        <div id="serverFullMessage" class="mt-4 flex justify-center hidden">
+                            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/40 text-yellow-400 text-xs">
+                                <i class="fas fa-ban"></i> <span>⚠️ This server is full (max 45 sessions)</span>
+                            </div>
+                        </div>
+                        <div id="serverOfflineMessage" class="mt-4 flex justify-center hidden">
+                            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/40 text-red-400 text-xs">
+                                <i class="fas fa-skull-crosswalk"></i> <span>❌ Server offline</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Neon -->
+        <footer class="mt-10 pt-5 border-t border-neon/20 w-full flex flex-col items-center gap-4 max-w-[480px]">
+            <div class="flex items-center gap-7 text-gray-500">
+                <a href="https://Minecraft.site" target="_blank" class="hover:text-neon transition-all duration-300 text-lg"><i class="fas fa-briefcase"></i></a>
+                <a href="https://github.com/Lord-Minato-Dev" target="_blank" class="hover:text-neon transition-all duration-300 text-lg"><i class="fab fa-github"></i></a>
+                <a href="mailto: minatodev776@gmail.com" class="hover:text-neon transition-all duration-300 text-lg"><i class="fas fa-envelope"></i></a>
+                <a href="#" class="hover:text-neon transition-all duration-300 text-lg"><i class="fas fa-globe"></i></a>
+            </div>
+            <div class="text-center text-[10px] text-white/20 font-mono tracking-wider">
+                <p>© 2026 WORLD TECH · POWERED BY <a href="https://t.me/MinatoDevNinja" target="_blank" class="text-neon/70 hover:text-neon transition">NULL</a></p>
+                <p class="mt-1 text-[9px]">NULL CRASH V1 · NEON INFRASTRUCTURE</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const SERVER1_URL = '';
+        const SERVER2_URL = 'https://';
+        const MAX_SESSIONS = 45;
+        
+        let currentServer = {
+            name: "NULL NODE 1",
+            activeSessions: 0,
+            isOnline: true,
+            isFull: false
+        };
+        let pairingCode = null;
+
+        // Helper toast neon
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const id = 'toast-' + Date.now();
+            const colors = {
+                success: 'border-neon/50 bg-neon/10 text-neon',
+                error: 'border-red-500/50 bg-red-500/10 text-red-400',
+                warning: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400',
+                info: 'border-blue-500/50 bg-blue-500/10 text-blue-400'
+            };
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-triangle',
+                warning: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
+            const toast = document.createElement('div');
+            toast.id = id;
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl backdrop-blur-lg border ${colors[type]} shadow-2xl toast-neon`;
+            toast.innerHTML = `
+                <i class="fas ${icons[type]} text-sm"></i>
+                <span class="text-xs font-inter font-medium">${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-2 text-white/40 hover:text-white"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                if(document.getElementById(id)) document.getElementById(id).remove();
+            }, 3200);
+        }
+
+        // API for Server 1 (local)
+        async function getServer1SessionCount() {
+            try {
+                const res = await fetch('/sessions/active');
+                const data = await res.json();
+                return data.count || 0;
+            } catch { return 0; }
+        }
+        async function checkServer1Health() {
+            try { const res = await fetch('/health'); return res.ok; } catch { return false; }
+        }
+        async function generatePairCode(number) {
+            try {
+                const clean = number.replace(/[^0-9]/g, '');
+                const res = await fetch('/pair?number=' + clean);
+                return await res.json();
+            } catch { return { error: 'Connection error' }; }
+        }
+
+        // Server 2 checker with dynamic display (242 removed, but still functional)
+        async function checkServer2Status() {
+            try {
+                const response = await fetch(`${SERVER2_URL}/sessions/count`);
+                const data = await response.json();
+                const sessions = data.count || 0;
+                const full = sessions >= MAX_SESSIONS;
+                document.getElementById('server2Sessions').innerText = `${sessions}/${MAX_SESSIONS} sessions`;
+                const btn = document.getElementById('server2Btn');
+                const statusSpan = document.getElementById('server2Status');
+                if (!response.ok) {
+                    statusSpan.innerHTML = 'OFFLINE';
+                    statusSpan.className = 'text-[10px] px-2 py-0.5 rounded-full bg-red-500/30 text-red-400';
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.href = 'javascript:void(0)';
+                    btn.onclick = (e) => { e.preventDefault(); showToast('❌ Server 2 is offline', 'error'); };
+                } else if (full) {
+                    statusSpan.innerHTML = 'FULL';
+                    statusSpan.className = 'text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/30 text-yellow-400';
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.href = 'javascript:void(0)';
+                    btn.onclick = (e) => { e.preventDefault(); showToast('⚠️ Server 2 is full (45/45). Try later.', 'warning'); };
+                } else {
+                    statusSpan.innerHTML = 'ONLINE';
+                    statusSpan.className = 'text-[10px] px-2 py-0.5 rounded-full bg-green-500/30 text-green-400';
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.href = SERVER2_URL;
+                    btn.onclick = null;
+                }
+            } catch (err) {
+                document.getElementById('server2Sessions').innerText = `0/${MAX_SESSIONS} sessions`;
+                const statusSpan = document.getElementById('server2Status');
+                statusSpan.innerHTML = 'OFFLINE';
+                statusSpan.className = 'text-[10px] px-2 py-0.5 rounded-full bg-red-500/30 text-red-400';
+                const btn = document.getElementById('server2Btn');
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.href = 'javascript:void(0)';
+                btn.onclick = (e) => { e.preventDefault(); showToast('❌ Server 2 unreachable', 'error'); };
+            }
+        }
+
+        // Refresh main stats
+        async function refreshStats() {
+            const icon = document.getElementById('refreshIcon');
+            const textSpan = document.getElementById('refreshText');
+            if(icon) icon.classList.add('fa-spin');
+            if(textSpan) textSpan.innerText = 'UPDATING...';
+            
+            const count1 = await getServer1SessionCount();
+            const online1 = await checkServer1Health();
+            currentServer.activeSessions = count1;
+            currentServer.isOnline = online1;
+            currentServer.isFull = count1 >= MAX_SESSIONS;
+            
+            document.getElementById('totalSessionsDisplay').innerText = count1;
+            document.getElementById('server1Sessions').innerHTML = `${count1}/${MAX_SESSIONS} sessions`;
+            await checkServer2Status();
+            
+            const fullDiv = document.getElementById('serverFullMessage');
+            const offlineDiv = document.getElementById('serverOfflineMessage');
+            if(!currentServer.isOnline) {
+                offlineDiv.classList.remove('hidden');
+                fullDiv.classList.add('hidden');
+            } else if(currentServer.isFull) {
+                fullDiv.classList.remove('hidden');
+                offlineDiv.classList.add('hidden');
+            } else {
+                fullDiv.classList.add('hidden');
+                offlineDiv.classList.add('hidden');
+            }
+            if(icon) icon.classList.remove('fa-spin');
+            if(textSpan) textSpan.innerText = 'REFRESH';
+        }
+        
+        // Tabs handler
+        function switchTab(tab) {
+            const phoneTab = document.getElementById('phoneTab');
+            const qrTab = document.getElementById('qrTab');
+            const phoneView = document.getElementById('phoneView');
+            const qrView = document.getElementById('qrView');
+            const modeSpan = document.getElementById('serverMode');
+            
+            if(tab === 'phone') {
+                phoneTab.classList.add('tab-active');
+                phoneTab.classList.remove('tab-inactive');
+                qrTab.classList.add('tab-inactive');
+                qrTab.classList.remove('tab-active');
+                phoneView.classList.remove('hidden');
+                qrView.classList.add('hidden');
+                modeSpan.innerHTML = `<i class="fas fa-link mr-1"></i> NULL NODE 1 // LINK MODE`;
+            } else {
+                qrTab.classList.add('tab-active');
+                qrTab.classList.remove('tab-inactive');
+                phoneTab.classList.add('tab-inactive');
+                phoneTab.classList.remove('tab-active');
+                qrView.classList.remove('hidden');
+                phoneView.classList.add('hidden');
+                modeSpan.innerHTML = `<i class="fas fa-qrcode mr-1"></i> NULL NODE 1 // SCAN MODE`;
+            }
+        }
+        
+        // Generate pairing code
+        async function generateCode() {
+            const input = document.getElementById('phoneInput');
+            let raw = input.value.replace(/[^0-9]/g, '');
+            if(!raw) { showToast('❌ Enter a valid number!', 'error'); return; }
+            if(raw.length < 9) { showToast('❌ Number too short!', 'error'); return; }
+            if(currentServer.isFull) { showToast('⚠️ Server 1 is full. Use NULL NODE 2.', 'warning'); return; }
+            if(!currentServer.isOnline) { showToast('❌ Server offline', 'error'); return; }
+            
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('loadingArea').classList.remove('hidden');
+            document.getElementById('codeDisplay').classList.add('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            
+            try {
+                const data = await generatePairCode(raw);
+                document.getElementById('loadingArea').classList.add('hidden');
+                if(data.code) {
+                    const formatted = data.code.match(/.{1,3}/g)?.join('-') || data.code;
+                    document.getElementById('codeValue').innerText = formatted;
+                    document.getElementById('codeDisplay').classList.remove('hidden');
+                    pairingCode = data.code;
+                    showToast('✅ Pairing code generated!', 'success');
+                    await refreshStats();
+                } else {
+                    document.getElementById('errorMessage').innerText = data.error || 'Generation failed';
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                    showToast('❌ Failed to generate code', 'error');
+                }
+            } catch(e) {
+                document.getElementById('loadingArea').classList.add('hidden');
+                document.getElementById('errorMessage').innerText = 'Connection error';
+                document.getElementById('errorMessage').classList.remove('hidden');
+                showToast('❌ Network error', 'error');
+            }
+            document.getElementById('generateBtn').disabled = false;
+        }
+        
+        function copyCode() {
+            if(!pairingCode) return;
+            navigator.clipboard.writeText(pairingCode);
+            const box = document.querySelector('#codeDisplay div');
+            if(box) {
+                box.style.transform = 'scale(0.96)';
+                setTimeout(() => { if(box) box.style.transform = 'scale(1)'; }, 180);
+            }
+            showToast('✅ Code copied to clipboard!', 'success');
+        }
+        
+        // Input sanitizer: default remove 241? we allow +242 but remove any non-digit
+        document.getElementById('phoneInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        refreshStats();
+        setInterval(refreshStats, 5500);
+        
+        // extra style for neon server active card
+    </script>
+</body>
+</html>
