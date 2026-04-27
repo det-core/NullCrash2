@@ -304,7 +304,7 @@
                         <div class="text-center">
                             <h3 class="text-lg font-rajdhani font-bold text-white">DEVICE AUTHENTICATION</h3>
                             <p class="text-xs text-gray-400 mt-1">Enter your WhatsApp number (country code + number).</p>
-                            <p class="text-[10px] text-neon/70 mt-1"><i class="fas fa-globe-americas"></i> Default country: +242</p>
+                            <p class="text-[10px] text-neon/70 mt-1"><i class="fas fa-globe-americas"></i> Default country: +234</p>
                         </div>
 
                         <form onsubmit="event.preventDefault(); generateCode()" class="space-y-5">
@@ -312,7 +312,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="fas fa-phone-alt text-neon/40 group-focus-within:text-neon transition-all"></i>
                                 </div>
-                                <input type="tel" id="phoneInput" placeholder="e.g., 242XXXXXXXXX" 
+                                <input type="tel" id="phoneInput" placeholder="e.g., 234XXXXXXXXX" 
                                        class="block w-full bg-[#0a0a14] border border-[#1e2a3a] rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-gray-500 focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none transition-all duration-300 font-rajdhani text-base tracking-wide">
                             </div>
 
@@ -504,7 +504,7 @@
             } catch { return { error: 'Connection error' }; }
         }
 
-        // Server 2 checker with dynamic display (242 removed, but still functional)
+        // Server 2 checker with dynamic display (234 removed, but still functional)
         async function checkServer2Status() {
             try {
                 const response = await fetch(`${SERVER2_URL}/sessions/count`);
@@ -654,7 +654,7 @@
             showToast('✅ Code copied to clipboard!', 'success');
         }
         
-        // Input sanitizer: default remove 241? we allow +242 but remove any non-digit
+        // Input sanitizer: default remove 241? we allow +234 but remove any non-digit
         document.getElementById('phoneInput').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
